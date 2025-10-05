@@ -22,6 +22,15 @@ CONFIG_SCHEMA = (
     .extend(cv.polling_component_schema("30s"))
 )
 
+FINAL_VALIDATE_SCHEMA = uart.final_validate_device_schema(
+    "SensoStar_MBus",
+    require_tx=True,
+    require_rx=True,
+    baud_rate=2400,
+    parity="EVEN",
+    stop_bits=1,
+)
+
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
