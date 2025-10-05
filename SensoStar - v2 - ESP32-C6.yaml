@@ -1,0 +1,83 @@
+esphome:
+  name: sensostar
+  comment: SensoStar Energy Meter
+
+esp32:
+  variant: esp32c6
+  framework:
+    type: esp-idf
+
+wifi:
+  ap:
+    ssid: "SensoStar"
+  reboot_timeout: 0s
+
+captive_portal:
+
+logger:
+  level: info
+
+ota:
+  platform: esphome
+
+web_server:
+  version: 3
+  port: 80
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/brambo123/esphome-sensostar
+    components: [ SensoStar_MBus ]
+
+status_led:
+  pin: GPIO1
+
+uart:
+  - id: uart_mbus
+    tx_pin: GPIO4
+    rx_pin: GPIO5
+    baud_rate: 2400
+    parity: EVEN
+    rx_full_threshold: 1
+
+  - id: uart_modbus
+    tx_pin: GPIO2
+    rx_pin: GPIO3
+    flow_control_pin: GPIO0
+    parity: EVEN
+    baud_rate: 9600
+
+modbus:
+  - id: modbus1
+    uart_id: uart_modbus
+    send_wait_time: 400ms
+
+SensoStar_MBus:
+  id: sensostar_id
+  uart_id: uart_mbus
+  update_interval: 10s
+
+sensor:
+  - platform: SensoStar_MBus
+    energy:
+      name: "SensoStar Energy"
+    volume:
+      name: "SensoStar Volume"
+    power:
+      name: "SensoStar Power"
+    flow:
+      name: "SensoStar Flow"
+    temperature_flow:
+      name: "SensoStar Flow Temperature"
+    temperature_return:
+      name: "SensoStar Return Temperature"
+    temperature_diff:
+      name: "SensoStar Temperature Difference"
+    calculated_power:
+      name: "SensoStar Calculated Power"
+
+text_sensor:
+  - platform: SensoStar_MBus
+    status:
+      name: "SensoStar Status"
