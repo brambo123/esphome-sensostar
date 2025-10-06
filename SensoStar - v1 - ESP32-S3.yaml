@@ -43,7 +43,6 @@ uart:
     rx_pin: GPIO38
     baud_rate: 2400
     parity: EVEN
-    rx_full_threshold: 1
 
   - id: uart_modbus
     tx_pin: GPIO20
