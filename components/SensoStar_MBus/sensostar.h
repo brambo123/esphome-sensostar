@@ -44,13 +44,15 @@ class SensoStarComponent : public PollingComponent, public uart::UARTDevice {
 
  protected:
   void publish_nans_();
-    
+
   std::vector<uint8_t> data_;
-  uint8_t receiving_{0};
   uint32_t last_transmission_{0};
-  bool trigger_next_;
-  bool FCB_;
+  uint16_t last_send_tx_offset_{0};
+  uint8_t receiving_{0};
   uint8_t init_state_{0};
+  bool trigger_next_{true};
+  bool FCB_;
+
 };
 
 }  // namespace sensostar
