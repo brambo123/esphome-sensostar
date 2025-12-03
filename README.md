@@ -32,7 +32,6 @@ Therefore, the new modules require fewer components, making them more compact an
 The newest version is based on an ESP32-C6-MINI-1 module and uses USB for both power and programming.  
 The PCB uses as many 'Basic' or 'Promotional Extended' components from JLCPCB as possible.  
 All necessary files for ordering directly from JLCPCB are available here.  
-Side note: the first version is still on order, so it has not been tested yet!  
 
 An RS485 connection is available as an option.  
 This allows you to read a Modbus electricity meter, making it possible to calculate the heat pump's COP.  
