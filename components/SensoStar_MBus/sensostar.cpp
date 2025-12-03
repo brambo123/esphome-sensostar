@@ -131,6 +131,9 @@ void SensoStarComponent::loop() {
                     // Store values for calculated_power
                     double flow = -127;
                     double tdiff = -127;
+                    // Store values for energy calculation
+                    int32_t power = -127;
+                    float energy = -127;
                     // Decode
                     uint8_t i = 19; // Skip start header and fixed data header
                     while(i < this->data_.size()-3){
@@ -180,9 +183,10 @@ void SensoStarComponent::loop() {
                         // VIF
                         uint8_t vif = this->data_[i_VIF] & 0x7f;
                         if ( (vif&0x78) == 0x00 && f == 0x00){ // Energy (Wh)
+                            energy = convert_value(result, (vif&0x07) - 3) / 1000;
 #ifdef USE_SENSOR
-                            if (this->energy_sensor_)
-                                this->energy_sensor_->publish_state(convert_value(result, (vif&0x07) - 3) / 1000);
+                            if (this->energy_sensor_ && this->energy_sensor_->get_accuracy_decimals() == 0)
+                                this->energy_sensor_->publish_state(energy);
 #endif
                         }
                         else if ( (vif&0x78) == 0x10 && f == 0x00){ // Volume (m3)
@@ -192,11 +196,10 @@ void SensoStarComponent::loop() {
 #endif
                         }
                         else if ( (vif&0x78) == 0x28 && f == 0x00){ // Power (W)
-                            int8_t decimals = (vif&0x07) - 3;
-                            double val = ((int32_t)result) * std::pow(10, decimals);
+                            power = convert_value(result, (vif&0x07) - 3);
 #ifdef USE_SENSOR
                             if (this->power_sensor_)
-                                this->power_sensor_->publish_state(convert_value(result, (vif&0x07) - 3));
+                                this->power_sensor_->publish_state(power);
 #endif
                         }
                         else if ( (vif&0x78) == 0x38 && f == 0x00){ // Volume Flow (m3/h)
@@ -293,8 +296,20 @@ void SensoStarComponent::loop() {
                             break;
                         }
                     }
-                    
 #ifdef USE_SENSOR
+                    if (this->energy_sensor_ && this->energy_sensor_->get_accuracy_decimals() > 0 && energy > 0){
+                        if (floor(energy) != floor(this->energy_calc_)){
+                            if (this->energy_calc_ > 0)
+                                this->energy_sensor_->publish_state(energy);
+                            this->energy_calc_ = energy;
+                        }
+                        else if (!std::isnan(this->energy_sensor_->get_raw_state()) && power >= 0){
+                            this->energy_calc_ += power / 3600 * (now - this->last_transmission_) / 1000;
+                            if (floor(energy) == floor(this->energy_calc_))
+                                this->energy_sensor_->publish_state(this->energy_calc_);
+                        }
+                    }
+
                     if (this->calculated_power_sensor_) {
                         if (tdiff == -127 || flow == -127)
                             this->calculated_power_sensor_->publish_state(NAN);

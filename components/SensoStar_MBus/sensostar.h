@@ -47,6 +47,8 @@ class SensoStarComponent : public PollingComponent, public uart::UARTDevice {
 
   std::vector<uint8_t> data_;
   uint32_t last_transmission_{0};
+  uint32_t last_energy_calc_{0};
+  float energy_calc_{0};
   uint16_t last_send_tx_offset_{0};
   uint8_t receiving_{0};
   uint8_t init_state_{0};
